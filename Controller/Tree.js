@@ -162,33 +162,45 @@ function Tree(users){
     };
 
     // Display all groups
-    this.DisplayGroups = function DisplayGroups(node, strRes, indentation){
+    this._DisplayGroups = function _DisplayGroups(node, strRes, indentation){
         if(node.parent === null)
             strRes += node.data.Name + '\n';
-        _indentation = indentation;
         indentation += '---';
         for(var i=0 ; i<node.children.length ; i++){
             strRes += indentation + node.children[i].data.Name + '\n';
-            this.DisplayGroups(node.children[i], strRes, indentation);
-            indentation = _indentation;
+            strRes += this._DisplayGroups(node.children[i], '', indentation);
         }
         return strRes;
     };
+
+    this.DisplayGroups = function DisplayGroups(){
+        if(this.isAnyNodeExist() === true)
+            return this._DisplayGroups(this.Node, '', '---');
+        else
+            return '';
+    };
+
 
     // Display all groups associated to user
     this._DisplayUserInGroups = function _DisplayUserInGroups(node, userName, strRes){
         if(node.parent === null && UsersType.prototype.UserIndexOf(node.data.Users, userName) > -1)
-            strRes += node.data.Name;
-
-        if(node.data.Users.length > 0) {
-            for (var i = 0; i < node.children.length; i++) {
-                if (UsersType.prototype.UserIndexOf(node.children[i].data.Users, userName) > -1)
-                    strRes += ', ' + node.children.data.Name;
-                this._DisplayUserInGroups(node.children[i], userName, strRes);
-            }
+            strRes += node.data.Name + ', ';
+        for (var i = 0; i < node.children.length; i++) {
+            if (UsersType.prototype.UserIndexOf(node.children[i].data.Users, userName) > -1)
+                strRes += node.children[i].data.Name + ', ';
+            strRes += this._DisplayUserInGroups(node.children[i], userName, '');
         }
+
         return strRes;
     };
+
+    this.DisplayUserInGroups = function DisplayUserInGroups(userName){
+        if(this.isAnyNodeExist() === true)
+            return this._DisplayUserInGroups(this.Node, userName, '').replace(/,([^,]*)$/,'$1').trim();
+        else
+            return '';
+    };
+
 
     //Display full tree
     this._DisplayUsersInGroups = function _DisplayUsersInGroups(node, strRes, indentation){
@@ -207,16 +219,6 @@ function Tree(users){
         }
         return strRes;
     };
-
-
-
-    this.DisplayUserInGroups = function DisplayUserInGroups(userName){
-        if(this.isAnyNodeExist() === true)
-            this._DisplayUserInGroups(this.Node, userName, '');
-        else
-            return '';
-    };
-
 
     this.DisplayUsersInGroups = function DisplayUsersInGroups() {
         if(this.isAnyNodeExist() === true)

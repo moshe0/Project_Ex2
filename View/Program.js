@@ -31,7 +31,7 @@ function processInput(answer) {
             rl.question('Enter group name:' + "\n", processDeleteGroup);
             break;
         case '7':
-            groups.DisplayGroups();
+            console.log(tree.DisplayGroups());
             rl.question('Press any key to continue:' + "\n", processContinue);
             break;
         case '8':
@@ -47,6 +47,9 @@ function processInput(answer) {
             rl.question('Press any key to continue:' + "\n", processContinue);
             break;
         case '11':
+            rl.question('Enter user name:' + "\n", processDisplayUserInGroups);
+            break;
+        case '12':
             rl.close();
             process.exit();
             break;
@@ -57,9 +60,7 @@ function processInput(answer) {
     }
 }
 
-function processContinue(answer) {
-    Main();
-}
+
 
 function processUserName(name) {
     user.Name = name;
@@ -158,6 +159,14 @@ function processUserGroup_u(user) {
     rl.question('Press any key to continue:' + "\n", processContinue);
 }
 
+function processDisplayUserInGroups(userName) {
+    console.log(tree.DisplayUserInGroups(userName));
+    rl.question('Press any key to continue:' + "\n", processContinue);
+}
+
+function processContinue(answer) {
+    Main();
+}
 
 
 
@@ -189,6 +198,32 @@ u2G = new U2G(users.users);
 })();
 
 function Main(){
+
+    //********** TEST **********************************
+    user.Name = 'qq'
+    user.Age = 11;
+    user.Password = 11;
+    users.AddUser(user);
+    group.Name = 'aa';
+    group.Users = [];
+    tree.AddGroup(group, null)
+    group.Name = 'ss';
+    group.Users = [];
+    tree.AddGroup(group, 'aa', 'zzzzzzzz');
+    group.Name = 'jj';
+    group.Users = [];
+    tree.AddGroup(group, 'aa', 'zzzzzzzz');
+    group.Name = 'dd';
+    group.Users = [];
+    tree.AddGroup(group, 'ss', 'zzzzzzzz');
+    group.Name = 'ff';
+    group.Users = [];
+    tree.AddGroup(group, 'ss', 'zzzzzzzz');
+    //tree.AddUserToGroup('qq', 'jj');
+    //tree.AddUserToGroup('qq', 'ff');
+
+    //***********************************************************
+
     rl.question(
         "Please chooce a number option:" + "\n" +
         "Users:" + "\n" +
@@ -204,5 +239,7 @@ function Main(){
         "   8. Add user to group." + "\n" +
         "   9. Remove user from group." + "\n" +
         "  10. Display a List of users in groups" + "\n" +
-        "11. Exit." + "\n", processInput);
+        "  11. Display a List of groups associated to user" + "\n" +
+
+        "12. Exit." + "\n", processInput);
 }
