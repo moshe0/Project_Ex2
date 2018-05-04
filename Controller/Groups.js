@@ -1,12 +1,12 @@
 function Groups(){
-    this.groups = [];
+    this.nTree = null;
 }
 
 Groups.prototype={
     AddGroup:
     function AddGroup(group){
-        if(this.GroupIndexOf(this.groups, group.Name) === -1) {
-            this.groups.push(Object.assign({}, group));
+        if(this.GroupIndexOf(this.nTree, group.Name) === -1) {
+            this.nTree.push(Object.assign({}, group));
             console.log('group: ' + group.Name + ' added!!!');
         }
         else
@@ -15,9 +15,9 @@ Groups.prototype={
 
     DeleteGroup:
      function DeleteGroup(groupName){
-         var res = this.GroupIndexOf(this.groups, groupName);
+         var res = this.GroupIndexOf(this.nTree, groupName);
          if(res > -1) {
-             this.groups.splice(res, 1);
+             this.nTree.splice(res, 1);
              console.log('group: ' + groupName + ' deleted!!!');
          }
          else
@@ -26,8 +26,8 @@ Groups.prototype={
 
     DisplayGroups:
     function DisplayGroups (){
-        for(var i=0 ; i<this.groups.length ; i++) {
-            console.log(this.groups[i].Name);
+        for(var i=0 ; i<this.nTree.length ; i++) {
+            console.log(this.nTree[i].Name);
         }
     },
 

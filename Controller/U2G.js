@@ -1,29 +1,31 @@
 const UsersType = require('./../Controller/Users');
 const GroupsType = require('./../Controller/Groups');
+const NTreeType = require('./../Model/NTree');
 
 
-function U2G(u, g) {
+
+function U2G(u) {
     this.users = u;
-    this.groups = g;
+    this.nTree = null;
 }
 
 U2G.prototype= {
         AddUserToGroup:
         function AddUserToGroup(groupName, userName) {
             var resStr = '';
-            var resGroupIndex = GroupsType.prototype.GroupIndexOf(this.groups, groupName);
+            var resGroupIndex = GroupsType.prototype.GroupIndexOf(this.nTree, groupName);
             if (resGroupIndex === -1) {
                 resStr = 'The group: ' + groupName + ' is not exists!!!';
                 return resStr;
             }
 
             var resUser = UsersType.prototype.UserIndexOf(this.users, userName);
-            var resGroup = UsersType.prototype.UserIndexOf(this.groups[resGroupIndex].Users, userName);
+            var resGroup = UsersType.prototype.UserIndexOf(this.nTree[resGroupIndex].Users, userName);
 
 
             if (resUser > -1) {
                 if (resGroup === -1) {
-                    this.groups[resGroupIndex].Users.push(this.users[resUser]);
+                    this.nTree[resGroupIndex].Users.push(this.users[resUser]);
                     resStr = 'The user: ' + userName + ' has added to group: ' + groupName + '!!!';
                 }
                 else
@@ -38,19 +40,19 @@ U2G.prototype= {
         RemoveUserFromGroup:
         function RemoveUserFromGroup(groupName, userName) {
             var resStr = '';
-            var resGroupIndex = GroupsType.prototype.GroupIndexOf(this.groups, groupName);
+            var resGroupIndex = GroupsType.prototype.GroupIndexOf(this.nTree, groupName);
             if (resGroupIndex === -1) {
                 resStr = 'The group: ' + groupName + ' is not exists!!!';
                 return resStr;
             }
 
             var resUser = UsersType.prototype.UserIndexOf(this.users, userName);
-            var resGroup = UsersType.prototype.UserIndexOf(this.groups[resGroupIndex].Users, userName);
+            var resGroup = UsersType.prototype.UserIndexOf(this.nTree[resGroupIndex].Users, userName);
 
 
             if (resUser > -1) {
                 if (resGroup > -1) {
-                    this.groups[resGroupIndex].Users.splice(resGroup, 1);
+                    this.nTree[resGroupIndex].Users.splice(resGroup, 1);
                     resStr = 'The user: ' + userName + ' has deleted from group: ' + groupName + '!!!';
                 }
                 else
@@ -64,18 +66,18 @@ U2G.prototype= {
 
         RemoveUserFromGroups:
         function RemoveUserFromGroups(userName){
-            for(var i=0 ; i<this.groups.length ; i++){
-                this.RemoveUserFromGroup(this.groups[i].Name, userName);
+            for(var i=0 ; i<this.nTree.length ; i++){
+                this.RemoveUserFromGroup(this.nTree[i].Name, userName);
             }
         },
 
         DisplayUsersInGroups:
         function DisplayUsersInGroups() {
             var str = '';
-            for(var i=0 ; i<this.groups.length ; i++){
-                str += this.groups[i].Name + '\n';
-                for(var j=0 ; j<this.groups[i].Users.length ; j++){
-                        str += this.groups[i].Users[j].Name + '(' + this.groups[i].Users[j].Age + ')' + '\n';
+            for(var i=0 ; i<this.nTree.length ; i++){
+                str += this.nTree[i].Name + '\n';
+                for(var j=0 ; j<this.nTree[i].Users.length ; j++){
+                        str += this.nTree[i].Users[j].Name + '(' + this.nTree[i].Users[j].Age + ')' + '\n';
                 }
             }
             console.log(str);

@@ -1,7 +1,9 @@
 const UserType = require('./../Model/User');
 const GroupType = require('./../Model/Group');
+const NTreeType = require('./../Model/NTree');
 const UsersType = require('./../Controller/Users');
 const GroupsType = require('./../Controller/Groups');
+const TreeType = require('./../Controller/Tree');
 const U2G = require('./../Controller/U2G');
 
 
@@ -41,7 +43,7 @@ function processInput(answer) {
             rl.question('Enter group name:' + "\n", processUserGroup_g);
             break;
         case '10':
-            u2G.DisplayUsersInGroups();
+            console.log(tree.DisplayUsersInGroups());
             rl.question('Press any key to continue:' + "\n", processContinue);
             break;
         case '11':
@@ -76,8 +78,8 @@ function processUserAge(age) {
             users.AddUser(user);
         }
         else if(actionTypeUser === 2){
-            user.Name = tmp_userName;
-            users.UpdateUser(tmp_userName, user);
+            user.Name = tmp_name;
+            users.UpdateUser(tmp_name, user);
         }
         rl.question('Press any key to continue:' + "\n", processContinue);
     }
@@ -93,17 +95,47 @@ function processDeleteUser(name) {
 
 
 function processUpdateUser(name) {
-    tmp_userName = name;
+    tmp_name = name;
     rl.question('Enter user password:' + "\n", processUserPassword);
 }
 
 
 
 function processAddGroup(name) {
-    group.Name = name;
-    group.Users = [];
-    groups.AddGroup(group);
-    rl.question('Press any key to continue:' + "\n", processContinue);
+    if(name === ''){
+        rl.question('Enter group name:' + "\n", processAddGroup);
+    }
+    else
+    {
+        group.Name = name;
+        group.Users = [];
+
+        if(tree.isAnyNodeExist() === false) {
+            console.log(tree.AddGroup(group, null));
+            rl.question('Press any key to continue:' + "\n", processContinue);
+        }
+        else{
+            rl.question('Enter group parent name:' + "\n", processAddGroupParentName);
+        }
+    }
+}
+
+function processAddGroupParentName(parentName) {
+    if (parentName === '')
+        rl.question('Enter group name:' + "\n", processAddGroupParentName);
+    else {
+        tmp_name = parentName;
+        rl.question('Enter create group name: (in case the parent name have users)' + "\n", processAddGroupCreateNodeName);
+    }
+}
+
+function processAddGroupCreateNodeName(createNodeName) {
+    if (createNodeName === '')
+        rl.question('Enter create group name: (in case the parent name have users)' + "\n", processAddGroupCreateNodeName);
+    else {
+        console.log(tree.AddGroup(group, tmp_name, createNodeName));
+        rl.question('Press any key to continue:' + "\n", processContinue);
+    }
 }
 
 function processDeleteGroup(name) {
@@ -113,16 +145,16 @@ function processDeleteGroup(name) {
 
 
 
-function processUserGroup_g(group) {
-    tmp_group = group;
+function processUserGroup_g(groupName) {
+    tmp_group = groupName;
     rl.question('Enter user name:' + "\n", processUserGroup_u);
 }
 
 function processUserGroup_u(user) {
-    if(actionTypeUserGroup === 1)
-        console.log(u2G.AddUserToGroup(tmp_group, user));
-    else if(actionTypeUserGroup === 2)
-        console.log(u2G.RemoveUserFromGroup(tmp_group, user));
+    if (actionTypeUserGroup === 1)
+        console.log(tree.AddUserToGroup(user, tmp_group));
+    else if (actionTypeUserGroup === 2)
+        console.log(tree.RemoveUserFromGroup(user, tmp_group));
     rl.question('Press any key to continue:' + "\n", processContinue);
 }
 
@@ -130,15 +162,9 @@ function processUserGroup_u(user) {
 
 
 
-user = new UserType();
-group = new GroupType();
-users = new UsersType();
-groups = new GroupsType();
-u2G = new U2G(users.users, groups.groups);
-
 
 var tmp_group;
-var tmp_userName;
+var tmp_name;
 var actionTypeUserGroup;
 var actionTypeUser;
 const readline = require('readline');
@@ -146,6 +172,15 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
+
+
+
+user = new UserType();
+group = new GroupType();
+users = new UsersType();
+tree = new TreeType(users.users);
+groups = new GroupsType();
+u2G = new U2G(users.users);
 
 
 (function init() {
