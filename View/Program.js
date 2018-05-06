@@ -57,7 +57,7 @@ function processInput(answer) {
             process.exit();
             break;
         default:
-            console.log(' You dont enter right chooce please try again!!!');
+            console.log('You don\'t enter right choose please try again!!!');
             rl.question('Press any key to continue:' + "\n", processContinue);
             break;
     }
@@ -246,7 +246,7 @@ tree = new TreeType(users.users);
 
 function Main(){
     rl.question(
-        "Please chooce a number option:" + "\n" +
+        "Please choose a number option:" + "\n" +
         "Users:" + "\n" +
         "   1. Add a user." + "\n" +
         "   2. Remove a user." + "\n" +

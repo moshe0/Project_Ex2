@@ -30,7 +30,6 @@ function Tree(users){
         return strRes;
     };
 
-
     this.RemoveUserFromGroup = function RemoveUserFromGroup(userName, groupName){
         var strRes = '';
         var node = this.SearchGroup(this.Node, groupName);
@@ -46,8 +45,6 @@ function Tree(users){
                         node = node.parent;
                         node.count--;
                     }
-
-
                     return 'User: ' + userName + ' removed from: ' + groupName + ' !!!';
                 }
             }
@@ -55,9 +52,6 @@ function Tree(users){
         }
         return strRes;
     };
-
-
-
 
     this._RemoveUserFromGroups = function _RemoveUserFromGroups(node, userName) {
         if(node.data.Users.length > 0)
@@ -68,11 +62,9 @@ function Tree(users){
         }
     }
 
-
     this.RemoveUserFromGroups = function RemoveUserFromGroups(userName) {
         this._RemoveUserFromGroups(this.Node, userName);
     }
-
 
     this.AddGroup = function AddGroup(group, groupParentName, createNodeName){
         var strRes = '';
@@ -87,7 +79,7 @@ function Tree(users){
         else if(!!this.SearchGroup(this.Node, createNodeName))
             strRes = 'The group: ' + createNodeName + ' already exist!!!';
         else if(createNodeName === group.Name)
-            strRes = 'The group name must be diffrent from create node name!!!';
+            strRes = 'The group name must be different from create node name!!!';
         else{
             var node = this.SearchGroup(this.Node, groupParentName);
             if(!node) {
@@ -140,6 +132,7 @@ function Tree(users){
         return strRes;
     };
 
+    //Search group in tree and return the node if it's exist and null if not exist
     this.SearchGroup = function SearchGroup(node, groupName){
         if(!node.data)
             return null;
@@ -199,7 +192,6 @@ function Tree(users){
     };
 
 
-
     // Display all groups
     this._DisplayGroups = function _DisplayGroups(node, strRes, indentation){
         if(node.parent === null)
@@ -246,12 +238,9 @@ function Tree(users){
         if(node.parent === null)
             strRes += node.data.Name + '(' + node.count + ')' + '\n';
         indentation += '   ';
-
         for(var i=0 ; i<node.data.Users.length ; i++) {
             strRes += indentation + node.data.Users[i].Name + '(' + node.data.Users[i].Age + ')' + '\n';
         }
-
-
         for(var i=0 ; i<node.children.length ; i++) {
             strRes += indentation + node.children[i].data.Name + '(' + node.children[i].count + ')' + '\n';
             strRes += this._DisplayUsersInGroups(node.children[i], '', indentation);
@@ -266,7 +255,6 @@ function Tree(users){
             return '';
     };
 
-
     function CreateNewNode(node, group){
         var newNode = new NTreeType(Object.assign({}, group), node, [], 0);
         return newNode;
@@ -277,10 +265,7 @@ function Tree(users){
             return false;
         return true;
     }
-
 }
-
-
 
 
 module.exports = Tree;
