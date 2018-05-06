@@ -97,11 +97,12 @@ function processRemoveUser(name) {
     rl.question('Press any key to continue:' + "\n", processContinue);
 }
 
-
 function processUpdateUser(name) {
     tmp_name = name;
     rl.question('Enter user password:' + "\n", processUserPassword);
 }
+
+
 
 function processAddGroup(name) {
     if(name === ''){
@@ -149,6 +150,15 @@ function processRemoveGroup(groupName) {
     }
 }
 
+function processFlatteningGroup(groupName) {
+    if (groupName === '')
+        rl.question('Enter group name:' + "\n", processFlatteningGroup);
+    else {
+        console.log(tree.Flattening(groupName));
+        rl.question('Press any key to continue:' + "\n", processContinue);
+    }
+}
+
 function processGroupPath(groupName) {
     if (groupName === '')
         rl.question('Enter group name:' + "\n", processGroupPath);
@@ -158,14 +168,7 @@ function processGroupPath(groupName) {
     }
 }
 
-function processFlatteningGroup(groupName) {
-    if (groupName === '')
-        rl.question('Enter group name:' + "\n", processFlatteningGroup);
-    else {
-        console.log(tree.Flattening(groupName));
-        rl.question('Press any key to continue:' + "\n", processContinue);
-    }
-}
+
 
 function processUserGroup_g(groupName) {
     tmp_group = groupName;

@@ -61,7 +61,6 @@ function Tree(users){
             this._RemoveUserFromGroups(node.children[i], userName);
         }
     }
-
     this.RemoveUserFromGroups = function RemoveUserFromGroups(userName) {
         this._RemoveUserFromGroups(this.Node, userName);
     }
@@ -183,7 +182,6 @@ function Tree(users){
         }
         return 'the group not exist!!!';
     };
-
     this.DisplayGroupPath = function DisplayGroupPath(groupName){
         if(this.isAnyNodeExist() === true)
             return this._DisplayGroupPath(this.Node, groupName, '');
@@ -203,7 +201,6 @@ function Tree(users){
         }
         return strRes;
     };
-
     this.DisplayGroups = function DisplayGroups(){
         if(this.isAnyNodeExist() === true)
             return this._DisplayGroups(this.Node, '', '---');
@@ -224,7 +221,6 @@ function Tree(users){
 
         return strRes;
     };
-
     this.DisplayUserInGroups = function DisplayUserInGroups(userName){
         if(this.isAnyNodeExist() === true)
             return this._DisplayUserInGroups(this.Node, userName, '').replace(/,([^,]*)$/,'$1').trim();
@@ -247,13 +243,15 @@ function Tree(users){
         }
         return strRes;
     };
-
     this.DisplayUsersInGroups = function DisplayUsersInGroups() {
         if(this.isAnyNodeExist() === true)
             return this._DisplayUsersInGroups(this.Node, '', '');
         else
             return '';
     };
+
+
+
 
     function CreateNewNode(node, group){
         var newNode = new NTreeType(Object.assign({}, group), node, [], 0);
