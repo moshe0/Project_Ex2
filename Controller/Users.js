@@ -14,8 +14,8 @@ Users.prototype={
             console.log('The user is already exists!!!');
     },
 
-    DeleteUser:
-    function DeleteUser(userName){
+    RemoveUser:
+    function RemoveUser(userName){
         var res = this.UserIndexOf(this.users, userName);
         if(res > -1) {
             this.users.splice(res, 1);

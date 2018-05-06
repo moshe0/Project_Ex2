@@ -1,10 +1,7 @@
 const UserType = require('./../Model/User');
 const GroupType = require('./../Model/Group');
-const NTreeType = require('./../Model/NTree');
 const UsersType = require('./../Controller/Users');
-const GroupsType = require('./../Controller/Groups');
 const TreeType = require('./../Controller/Tree');
-const U2G = require('./../Controller/U2G');
 
 
 function processInput(answer) {
@@ -14,7 +11,7 @@ function processInput(answer) {
             rl.question('Enter user name:' + "\n", processUserName);
             break;
         case '2':
-            rl.question('Enter user name:' + "\n", processDeleteUser);
+            rl.question('Enter user name:' + "\n", processRemoveUser);
             break;
         case '3':
             actionTypeUser = 2;
@@ -28,28 +25,34 @@ function processInput(answer) {
             rl.question('Enter group name:' + "\n", processAddGroup);
             break;
         case '6':
-            rl.question('Enter group name:' + "\n", processDeleteGroup);
+            rl.question('Enter group name:' + "\n", processRemoveGroup);
             break;
         case '7':
+            rl.question('Enter group name:' + "\n", processFlatteningGroup);
+            break;
+        case '8':
             console.log(tree.DisplayGroups());
             rl.question('Press any key to continue:' + "\n", processContinue);
             break;
-        case '8':
+        case '9':
+            rl.question('Enter group name:' + "\n", processGroupPath);
+            break;
+        case '10':
             actionTypeUserGroup = 1;
             rl.question('Enter group name:' + "\n", processUserGroup_g);
             break;
-        case '9':
+        case '11':
             actionTypeUserGroup = 2;
             rl.question('Enter group name:' + "\n", processUserGroup_g);
             break;
-        case '10':
+        case '12':
             console.log(tree.DisplayUsersInGroups());
             rl.question('Press any key to continue:' + "\n", processContinue);
             break;
-        case '11':
+        case '13':
             rl.question('Enter user name:' + "\n", processDisplayUserInGroups);
             break;
-        case '12':
+        case '14':
             rl.close();
             process.exit();
             break;
@@ -88,9 +91,9 @@ function processUserAge(age) {
         rl.question('Enter user age:' + "\n", processUserAge);
 }
 
-function processDeleteUser(name) {
-    u2G.RemoveUserFromGroups(name);
-    users.DeleteUser(name);
+function processRemoveUser(name) {
+    tree.RemoveUserFromGroups(name);
+    users.RemoveUser(name);
     rl.question('Press any key to continue:' + "\n", processContinue);
 }
 
@@ -99,8 +102,6 @@ function processUpdateUser(name) {
     tmp_name = name;
     rl.question('Enter user password:' + "\n", processUserPassword);
 }
-
-
 
 function processAddGroup(name) {
     if(name === ''){
@@ -139,23 +140,43 @@ function processAddGroupCreateNodeName(createNodeName) {
     }
 }
 
-function processDeleteGroup(name) {
-    groups.DeleteGroup(name);
-    rl.question('Press any key to continue:' + "\n", processContinue);
+function processRemoveGroup(groupName) {
+    if (groupName === '')
+        rl.question('Enter group name:' + "\n", processRemoveGroup);
+    else {
+        console.log(tree.RemoveGroup(groupName));
+        rl.question('Press any key to continue:' + "\n", processContinue);
+    }
 }
 
+function processGroupPath(groupName) {
+    if (groupName === '')
+        rl.question('Enter group name:' + "\n", processGroupPath);
+    else {
+        console.log(tree.DisplayGroupPath(groupName));
+        rl.question('Press any key to continue:' + "\n", processContinue);
+    }
+}
 
+function processFlatteningGroup(groupName) {
+    if (groupName === '')
+        rl.question('Enter group name:' + "\n", processFlatteningGroup);
+    else {
+        console.log(tree.Flattening(groupName));
+        rl.question('Press any key to continue:' + "\n", processContinue);
+    }
+}
 
 function processUserGroup_g(groupName) {
     tmp_group = groupName;
     rl.question('Enter user name:' + "\n", processUserGroup_u);
 }
 
-function processUserGroup_u(user) {
+function processUserGroup_u(userName) {
     if (actionTypeUserGroup === 1)
-        console.log(tree.AddUserToGroup(user, tmp_group));
+        console.log(tree.AddUserToGroup(userName, tmp_group));
     else if (actionTypeUserGroup === 2)
-        console.log(tree.RemoveUserFromGroup(user, tmp_group));
+        console.log(tree.RemoveUserFromGroup(userName, tmp_group));
     rl.question('Press any key to continue:' + "\n", processContinue);
 }
 
@@ -188,25 +209,20 @@ user = new UserType();
 group = new GroupType();
 users = new UsersType();
 tree = new TreeType(users.users);
-groups = new GroupsType();
-u2G = new U2G(users.users);
 
 
 (function init() {
-    console.log("Welcome to SqlLabs chat!!!");
-    Main();
-})();
-
-function Main(){
-
     //********** TEST **********************************
-    user.Name = 'qq'
+    user.Name = 'qq';
     user.Age = 11;
     user.Password = 11;
     users.AddUser(user);
     group.Name = 'aa';
     group.Users = [];
-    tree.AddGroup(group, null)
+    tree.AddGroup(group, null);
+    group.Name = 'zz';
+    group.Users = [];
+    tree.AddGroup(group, 'aa', 'zzzzzzzz');
     group.Name = 'ss';
     group.Users = [];
     tree.AddGroup(group, 'aa', 'zzzzzzzz');
@@ -219,11 +235,16 @@ function Main(){
     group.Name = 'ff';
     group.Users = [];
     tree.AddGroup(group, 'ss', 'zzzzzzzz');
-    //tree.AddUserToGroup('qq', 'jj');
-    //tree.AddUserToGroup('qq', 'ff');
+    tree.AddUserToGroup('qq', 'jj');
+    tree.AddUserToGroup('qq', 'ff');
 
     //***********************************************************
 
+    console.log("Welcome to SqlLabs chat!!!");
+    Main();
+})();
+
+function Main(){
     rl.question(
         "Please chooce a number option:" + "\n" +
         "Users:" + "\n" +
@@ -234,12 +255,14 @@ function Main(){
         "Groups:" + "\n" +
         "   5. Add a Group." + "\n" +
         "   6. Remove a Group." + "\n" +
-        "   7. Display a List of groups" + "\n" +
+        "   7. Flattening a Group." + "\n" +
+        "   8. Display a List of groups." + "\n" +
+        "   9. Display a path of group in tree." + "\n" +
         "Users to Groups association:" + "\n" +
-        "   8. Add user to group." + "\n" +
-        "   9. Remove user from group." + "\n" +
-        "  10. Display a List of users in groups" + "\n" +
-        "  11. Display a List of groups associated to user" + "\n" +
+        "  10. Add user to group." + "\n" +
+        "  11. Remove user from group." + "\n" +
+        "  12. Display a List of users in groups." + "\n" +
+        "  13. Display a List of groups associated to user." + "\n" +
 
-        "12. Exit." + "\n", processInput);
+        "14. Exit." + "\n", processInput);
 }
