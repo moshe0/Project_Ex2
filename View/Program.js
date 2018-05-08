@@ -118,17 +118,46 @@ function processAddGroup(name) {
             rl.question('Press any key to continue:' + "\n", processContinue);
         }
         else{
-            rl.question('Enter group parent name:' + "\n", processAddGroupParentName);
+            strQuestion = 'Enter create group name: (in case the parent name have users)' + "\n";
+            callBack = processAddGroupCreateNodeName;
+            rl.question('Enter group parent name:' + "\n", processParentName);
         }
     }
 }
 
-function processAddGroupParentName(parentName) {
-    if (parentName === '')
-        rl.question('Enter group name:' + "\n", processAddGroupParentName);
+function processParentName(parentName) {
+    if (parentName === '') {
+        rl.question('Enter group name:' + "\n", processParentName);
+    }
+    getParentGroup(parentName);
+}
+function getParentGroup(parentName){
+    var strRes = tree.DisplayGroupPath(parentName);
+    if(strRes === ''){
+        console.log('The group: ' + parentName + ' not exist!!!');
+        rl.question('Press any key to continue:' + "\n", processContinue);
+    }
+    else if(strRes.startsWith('1.') === false) {
+        tree.tmpParentNode = tree.tmpArrNode[0];
+        if(strQuestion === '')
+            callBack();
+        else
+            rl.question(strQuestion, callBack);
+    }
     else {
-        tmp_name = parentName;
-        rl.question('Enter create group name: (in case the parent name have users)' + "\n", processAddGroupCreateNodeName);
+        console.log(strRes);
+        rl.question('Select number of group path:' + "\n", processNumberGroupPath);
+    }
+}
+function processNumberGroupPath(num) {
+    if (isNaN(num) || num > tree.tmpArrNode.length)
+        rl.question('Select number of group path:' + "\n", processNumberGroupPath);
+    else {
+        tree.tmpParentNode = tree.tmpArrNode[num - 1];
+        if(strQuestion === '')
+            callBack();
+        else
+            rl.question(strQuestion, callBack);
     }
 }
 
@@ -136,7 +165,7 @@ function processAddGroupCreateNodeName(createNodeName) {
     if (createNodeName === '')
         rl.question('Enter create group name: (in case the parent name have users)' + "\n", processAddGroupCreateNodeName);
     else {
-        console.log(tree.AddGroup(group, tmp_name, createNodeName));
+        console.log(tree.AddGroup(group, createNodeName));
         rl.question('Press any key to continue:' + "\n", processContinue);
     }
 }
@@ -145,18 +174,33 @@ function processRemoveGroup(groupName) {
     if (groupName === '')
         rl.question('Enter group name:' + "\n", processRemoveGroup);
     else {
-        console.log(tree.RemoveGroup(groupName));
-        rl.question('Press any key to continue:' + "\n", processContinue);
+
+        tmp_group = groupName;
+        strQuestion = '';
+        callBack = processRemoveGroupAction;
+        rl.question('Enter group parent name:' + "\n", processParentName);
     }
+}
+
+function processRemoveGroupAction(){
+    console.log(tree.RemoveGroup(tmp_group));
+    rl.question('Press any key to continue:' + "\n", processContinue);
 }
 
 function processFlatteningGroup(groupName) {
     if (groupName === '')
         rl.question('Enter group name:' + "\n", processFlatteningGroup);
     else {
-        console.log(tree.Flattening(groupName));
-        rl.question('Press any key to continue:' + "\n", processContinue);
+        tmp_group = groupName;
+        strQuestion = '';
+        callBack = processFlatteningGroupAction;
+        rl.question('Enter group parent name:' + "\n", processParentName);
     }
+}
+
+function processFlatteningGroupAction(){
+    console.log(tree.Flattening(tmp_group));
+    rl.question('Press any key to continue:' + "\n", processContinue);
 }
 
 function processGroupPath(groupName) {
@@ -172,7 +216,9 @@ function processGroupPath(groupName) {
 
 function processUserGroup_g(groupName) {
     tmp_group = groupName;
-    rl.question('Enter user name:' + "\n", processUserGroup_u);
+    strQuestion = 'Enter user name:' + "\n";
+    callBack = processUserGroup_u;
+    rl.question('Enter group parent name:' + "\n", processParentName);
 }
 
 function processUserGroup_u(userName) {
@@ -200,6 +246,8 @@ var tmp_group;
 var tmp_name;
 var actionTypeUserGroup;
 var actionTypeUser;
+var callBack;
+var strQuestion;
 const readline = require('readline');
 const rl = readline.createInterface({
     input: process.stdin,
@@ -220,25 +268,38 @@ tree = new TreeType(users.users);
     user.Age = 11;
     user.Password = 11;
     users.AddUser(user);
+
+
     group.Name = 'aa';
     group.Users = [];
-    tree.AddGroup(group, null);
+    tree.AddGroup(group, 'zzzzzzzz');
+
+    tree.tmpParentNode = tree.Node;
     group.Name = 'zz';
     group.Users = [];
-    tree.AddGroup(group, 'aa', 'zzzzzzzz');
+    tree.AddGroup(group, 'zzzzzzzz');
     group.Name = 'ss';
     group.Users = [];
-    tree.AddGroup(group, 'aa', 'zzzzzzzz');
+    tree.AddGroup(group, 'zzzzzzzz');
     group.Name = 'jj';
     group.Users = [];
-    tree.AddGroup(group, 'aa', 'zzzzzzzz');
+    tree.AddGroup(group, 'zzzzzzzz');
+
+    tree.tmpParentNode = tree.Node.children[1];
     group.Name = 'dd';
     group.Users = [];
-    tree.AddGroup(group, 'ss', 'zzzzzzzz');
+    tree.AddGroup(group, 'zzzzzzzz');
     group.Name = 'ff';
     group.Users = [];
-    tree.AddGroup(group, 'ss', 'zzzzzzzz');
+    tree.AddGroup(group, 'zzzzzzzz');
+    tree.tmpParentNode = tree.Node.children[0];
+    group.Name = 'ss';
+    group.Users = [];
+    tree.AddGroup(group, 'zzzzzzzz');
+
+    tree.tmpParentNode = tree.Node;
     tree.AddUserToGroup('qq', 'jj');
+    tree.tmpParentNode = tree.Node.children[1];
     tree.AddUserToGroup('qq', 'ff');
 
     //***********************************************************

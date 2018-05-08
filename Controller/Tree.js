@@ -3,12 +3,15 @@ const UsersType = require('./../Controller/Users');
 const NTreeType = require('./../Model/NTree');
 
 function Tree(users){
+    this.tmpRes = null;
+    this.tmpParentNode = null;
+    this.tmpArrNode = [];
     this.users = users;
     this.Node = null;
 
     this.AddUserToGroup = function AddUserToGroup(user, groupName){
         var strRes = '';
-        var node = this.SearchGroup(this.Node, groupName);
+        var node = this.SearchGroup(this.tmpParentNode, groupName);
         var userRes = UsersType.prototype.UserIndexOf(this.users, user);
         if(!node)
             strRes = 'Group: ' + groupName + ' not exist!!!';
@@ -30,10 +33,8 @@ function Tree(users){
         return strRes;
     };
 
-    this.RemoveUserFromGroup = function RemoveUserFromGroup(userName, groupName){
+    this.RemoveUserFromGroup = function RemoveUserFromGroup(node, userName, groupName){
         var strRes = '';
-        var node = this.SearchGroup(this.Node, groupName);
-
         if(!node)
             strRes = 'Group: ' + groupName + ' not exist!!!';
         else{
@@ -53,56 +54,53 @@ function Tree(users){
         return strRes;
     };
 
-    this._RemoveUserFromGroups = function _RemoveUserFromGroups(node, userName) {
-        if(node.data.Users.length > 0)
-            this.RemoveUserFromGroup(userName, node.data.Name);
 
-        for(var i=0 ; i<node.children.length ; i++){
+    this._RemoveUserFromGroups = function _RemoveUserFromGroups(node, userName) {
+        if(UsersType.prototype.UserIndexOf(node.data.Users, userName) > -1)
+            this.RemoveUserFromGroup(node, userName);
+        for (var i = 0; i < node.children.length; i++) {
             this._RemoveUserFromGroups(node.children[i], userName);
         }
-    }
-    this.RemoveUserFromGroups = function RemoveUserFromGroups(userName) {
-        this._RemoveUserFromGroups(this.Node, userName);
-    }
+    };
 
-    this.AddGroup = function AddGroup(group, groupParentName, createNodeName){
-        var strRes = '';
+    this.RemoveUserFromGroups = function RemoveUserFromGroups(userName) {
+        if(this.isAnyNodeExist() === false)
+            return '';
+        this._RemoveUserFromGroups(this.Node, userName);
+    };
+
+    this.AddGroup = function AddGroup(group, createNodeName){
         if(this.isAnyNodeExist() === false){
             this.Node = CreateNewNode(null, group);
-            strRes = 'Group: ' + group.Name + ' added!!!';
+            return 'Group: ' + group.Name + ' added!!!';
         }
-        else if(groupParentName === '')
-            strRes = 'Group parent: ' + groupParentName + ' not exist!!!';
-        else if(!!this.SearchGroup(this.Node, group.Name))
-            strRes = 'The group: ' + group.Name + ' already exist!!!';
-        else if(!!this.SearchGroup(this.Node, createNodeName))
-            strRes = 'The group: ' + createNodeName + ' already exist!!!';
         else if(createNodeName === group.Name)
-            strRes = 'The group name must be different from create node name!!!';
+            return 'The group name must be different from create node name!!!';
+
+        var node = this.SearchGroup(this.tmpParentNode, group.Name);
+        if(!!node)
+            return 'The group: ' + group.Name + ' already exist!!!';
         else{
-            var node = this.SearchGroup(this.Node, groupParentName);
-            if(!node) {
-                strRes = 'Parent group: ' + groupParentName + ' not exist!!!';
-            }
-            else{
-                node.children.push(CreateNewNode(node, group));
-                strRes = 'Group: ' + group.Name + ' added to ' + node.data.Name + '!!!';
-                if(node.data.Users.length > 0) {
-                    var tmpGroup = new GroupType();
-                    tmpGroup.Name = createNodeName;
-                    tmpGroup.Users = Object.assign({}, node.data.Users);
-                    node.data.Users = [];
-                    node.children.push(CreateNewNode(node, tmpGroup));
-                    strRes += '\n' + 'Group: ' + createNodeName + ' added to ' + node.data.Name + '!!!';
-                }
+            node = this.tmpParentNode;
+            node.children.push(CreateNewNode(node, group));
+            var strRes = 'Group: ' + group.Name + ' added to ' + node.data.Name + '!!!';
+            if(node.data.Users.length > 0) {
+                var tmpGroup = new GroupType();
+                tmpGroup.Name = createNodeName;
+                tmpGroup.Users = node.data.Users.slice();
+                node.data.Users = [];
+                node.children.push(CreateNewNode(node, tmpGroup));
+                strRes += '\n' + 'Group: ' + createNodeName + ' added to ' + node.data.Name + '!!!';
+                return strRes;
             }
         }
+
         return strRes;
     };
 
     this.RemoveGroup = function RemoveGroup(groupName){
         var strRes = '';
-        var node = this.SearchGroup(this.Node, groupName);
+        var node = this.SearchGroup(this.tmpParentNode, groupName);
         if(!node) {
             strRes = 'Group: ' + groupName + ' not exist!!!';
         }
@@ -131,31 +129,25 @@ function Tree(users){
         return strRes;
     };
 
-    //Search group in tree and return the node if it's exist and null if not exist
+    //Search group in children of node and return the node child if it's exist and null if not exist
     this.SearchGroup = function SearchGroup(node, groupName){
         if(!node.data)
             return null;
-        else if(node.data.Name === groupName)
-            return node;
-        else {
-            var nodeTmp;
-            for(var i=0 ; i<node.children.length ; i++){
-                nodeTmp = SearchGroup(node.children[i], groupName);
-                if(!!nodeTmp)
-                    return nodeTmp;
-            }
-            return null;
-        }
+         for(var i=0 ; i<node.children.length ; i++){
+             if(node.children[i].data.Name === groupName)
+                 return node.children[i];
+         }
+         return null;
     };
 
     this.Flattening = function Flattening(groupName){
         var strRes = '';
-        var node = this.SearchGroup(this.Node, groupName);
+        var node = this.SearchGroup(this.tmpParentNode, groupName);
 
         if(!node)
             strRes = 'Group: ' + groupName + ' not exist!!!';
         else{
-            if(node.data.Users.length === 0 || node.parent === null || node.parent.children > 1)
+            if(node.data.Users.length === 0 || node.parent === null || node.parent.children.length > 1)
                 this.RemoveGroup(node.data.Name);
             else{
                 node.parent.data.Users = node.data.Users;
@@ -164,29 +156,6 @@ function Tree(users){
             strRes = 'Group: ' + groupName + ' flatted!!!';
         }
         return strRes;
-    };
-
-    //Display path in tree for specific group
-    this._DisplayGroupPath = function _DisplayGroupPath(node, groupName, strRes){
-        if(node.data.Name === groupName)
-            return groupName;
-        else {
-            strRes += node.data.Name + '->';
-            for(var i=0 ; i<node.children.length ; i++){
-                var tmpStr = this._DisplayGroupPath(node.children[i], groupName, '');
-                if(tmpStr.endsWith(groupName) === true) {
-                    strRes += tmpStr;
-                    return strRes;
-                }
-            }
-        }
-        return 'the group not exist!!!';
-    };
-    this.DisplayGroupPath = function DisplayGroupPath(groupName){
-        if(this.isAnyNodeExist() === true)
-            return this._DisplayGroupPath(this.Node, groupName, '');
-        else
-            return '';
     };
 
 
@@ -250,11 +219,8 @@ function Tree(users){
             return '';
     };
 
-
-
-
     function CreateNewNode(node, group){
-        var newNode = new NTreeType(Object.assign({}, group), node, [], 0);
+        var newNode = new NTreeType(Object.assign({}, group), node, [], group.Users.length);
         return newNode;
     }
 
@@ -262,7 +228,41 @@ function Tree(users){
         if(!this.Node)
             return false;
         return true;
-    }
+    };
+
+
+    //Display path in tree for specific group
+    this._DisplayGroupPath = function _DisplayGroupPath(node, groupName, strRes, strResArr){
+        if(node.data.Name === groupName) {
+            this.tmpArrNode.push(node);
+            strRes += node.data.Name;
+            strResArr.push(strRes);
+        }
+        strRes += node.data.Name + '->';
+        for(var i=0 ; i<node.children.length ; i++){
+            this._DisplayGroupPath(node.children[i], groupName, strRes, strResArr);
+        }
+        return strResArr;
+    };
+
+
+    this.DisplayGroupPath = function DisplayGroupPath(groupName){
+        this.tmpArrNode = [];
+
+        if(this.isAnyNodeExist() === true) {
+            var arr = this._DisplayGroupPath(this.Node, groupName, '', []);
+            if(arr.length === 0)
+                return '';
+            if(arr.length === 1)
+                return arr[0];
+            var res = '';
+            for(var i=0 ; i<arr.length ; i++)
+                res += i+1 + '. ' + arr[i] + '\n';
+            return res;
+        }
+        else
+            return '';
+    };
 }
 
 
